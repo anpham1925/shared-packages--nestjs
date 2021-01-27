@@ -1,0 +1,9 @@
+{
+  "name": "test-public-package",
+  "version": "1.0.0",
+  "description": "Testing publishing package",
+  "main": "index.js",
+  "repository": "https://github.com/anpham1925/test-public-package",
+  "author": "An Pham",
+  "license": "MIT"
+}
