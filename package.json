@@ -10,10 +10,11 @@
     "@nestjs/common": "^7.6.6",
     "@nestjs/core": "^7.6.7",
     "@nestjs/typeorm": "^7.1.5",
+    "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
     "typeorm": "^0.2.30"
   },
   "scripts": {
-    "prepublish": "tsc"
+    "prepublish": "rimraf dist && tsc"
   }
 }

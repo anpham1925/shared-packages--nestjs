@@ -4,4 +4,4 @@ export {
   AuditLogModule,
   AuditLogService,
   METADATA,
-} from './audit-log';
+} from './src/audit-log';
