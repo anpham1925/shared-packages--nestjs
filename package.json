@@ -1,7 +1,7 @@
 {
-  "name": "test-public-package",
+  "name": "@anpham1925/nestjs",
   "version": "1.1.0",
-  "description": "Testing publishing package",
+  "description": "Custom Modules and Helpers for NestJS",
   "main": "index.js",
   "repository": "https://github.com/anpham1925/test-public-package",
   "author": "An Pham",
