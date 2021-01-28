@@ -1,9 +1,16 @@
 {
   "name": "test-public-package",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Testing publishing package",
   "main": "index.js",
   "repository": "https://github.com/anpham1925/test-public-package",
   "author": "An Pham",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@nestjs/common": "^7.6.6",
+    "@nestjs/core": "^7.6.7",
+    "@nestjs/typeorm": "^7.1.5",
+    "rxjs": "^6.6.3",
+    "typeorm": "^0.2.30"
+  }
 }
