@@ -1,6 +1,5 @@
 import { Column, Entity } from 'typeorm';
 import { CommonEntity } from '../common/entities/common.entity';
-import { USER_ROLE } from '../user/enums/userRole.enum';
 
 @Entity()
 export class AuditLog extends CommonEntity {
