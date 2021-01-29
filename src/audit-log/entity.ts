@@ -1,5 +1,5 @@
 import { Column, Entity } from 'typeorm';
-import { CommonEntity } from '../entities/common.entity';
+import { CommonEntity } from '../entities/common';
 
 @Entity()
 export class AuditLog extends CommonEntity {
