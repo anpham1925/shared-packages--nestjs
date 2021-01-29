@@ -9,3 +9,4 @@ export { Log, LogModule, LogService } from './custom-log';
 export { AllExceptionsFilter } from './filters';
 export { customThrowError } from './helpers';
 export { FormatResponseInterceptor } from './interceptors';
+export { CommonEntity } from './entities';
