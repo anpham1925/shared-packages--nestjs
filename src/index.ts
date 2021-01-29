@@ -7,3 +7,4 @@ export {
 } from './audit-log';
 export { Log, LogModule, LogService } from './custom-log';
 export { AllExceptionsFilter } from './filters';
+export { customThrowError } from './helpers';
