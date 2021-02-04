@@ -1,1 +1,1 @@
-export { customThrowError } from './throw';
+export { customThrowError, getError } from './throw';

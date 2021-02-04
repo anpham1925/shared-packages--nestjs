@@ -8,3 +8,12 @@ export const customThrowError = (
 ): void => {
   throw new HttpException({ message, errorCode, error }, code);
 };
+
+export const getError = (
+  message: string,
+  code: HttpStatus,
+  errorCode?: string,
+  error?: Error,
+): HttpException => {
+  return new HttpException({ message, errorCode, error }, code);
+};
