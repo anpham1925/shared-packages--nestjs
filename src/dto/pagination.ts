@@ -3,8 +3,8 @@ import { Transform, Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
 
 enum SortDirection {
-  ASC = 'asc',
-  DESC = 'desc',
+  ASC = 'ASC',
+  DESC = 'DESC',
 }
 
 export class PaginationRequest<T> {
@@ -21,6 +21,7 @@ export class PaginationRequest<T> {
   take: number;
 
   @ApiPropertyOptional()
+  @ApiPropertyOptional({ name: 'orderBy', type: 'string' })
   @IsOptional()
   orderBy?: keyof T;
 
