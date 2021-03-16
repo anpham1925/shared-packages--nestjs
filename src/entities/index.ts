@@ -1,1 +1,1 @@
-export { CommonEntity } from './common';
+export { CommonEntity, IsNotNull, CustomAny } from './common';
