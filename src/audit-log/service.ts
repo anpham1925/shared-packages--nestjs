@@ -15,7 +15,7 @@ export class AuditLogService {
     action: string,
     request: Record<string, any>,
     restricted: boolean = false,
-  ): Promise<number> {
+  ): Promise<string | number> {
     const log = new AuditLog();
 
     log.userId = request.authInstance ? request.authInstance.id : null;

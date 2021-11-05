@@ -1,8 +1,8 @@
 import { Column, Entity } from 'typeorm';
-import { CommonEntity } from '../entities/common';
+import { BaseEntity } from '../entities/common';
 
 @Entity()
-export class AuditLog extends CommonEntity {
+export class AuditLog extends BaseEntity {
   @Column()
   action: string;
 
@@ -10,7 +10,7 @@ export class AuditLog extends CommonEntity {
   module: string;
 
   @Column({ nullable: true })
-  userId: number;
+  userId: string;
 
   @Column({ nullable: true })
   role: string;

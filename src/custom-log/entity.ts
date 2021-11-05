@@ -1,8 +1,8 @@
 import { Column, Entity } from 'typeorm';
-import { CommonEntity } from '../entities/common';
+import { BaseEntity } from '../entities/common';
 
 @Entity()
-export class Log extends CommonEntity {
+export class Log extends BaseEntity {
   @Column({
     nullable: true,
   })

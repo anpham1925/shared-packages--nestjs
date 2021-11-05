@@ -24,7 +24,7 @@ export class FormatResponseInterceptor implements NestInterceptor {
     );
 
     return next.handle().pipe(
-      map((data) => {
+      map((data: any) => {
         return willFormat ? { success: true, result: data } : data;
       }),
     );

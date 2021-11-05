@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsInt, IsOptional, Min } from 'class-validator';
 
-enum SortDirection {
+enum SORT_DIRECTION {
   ASC = 'ASC',
   DESC = 'DESC',
 }
@@ -20,21 +20,20 @@ export class PaginationRequest<T> {
   @Min(0)
   take: number;
 
-  @ApiPropertyOptional()
   @ApiPropertyOptional({ name: 'orderBy', type: 'string' })
   @IsOptional()
   orderBy?: keyof T;
 
-  @ApiPropertyOptional({ enum: SortDirection })
+  @ApiPropertyOptional({ enum: SORT_DIRECTION })
   @IsOptional()
-  orderDirection?: SortDirection;
+  orderDirection?: SORT_DIRECTION;
 
   @ApiPropertyOptional()
   @IsOptional()
   search?: string;
 
   @ApiPropertyOptional()
-  @Transform((x) => x === 'true')
+  @Transform(({ value }) => value === 'true')
   @IsOptional()
   isGettingDeleted?: boolean;
 }

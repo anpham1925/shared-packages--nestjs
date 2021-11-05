@@ -1,1 +1,1 @@
-export { CommonEntity, IsNotNull, CustomAny } from './common';
+export { BaseEntity, BaseEntityMongoDB, CustomAny, IsNotNull } from './common';

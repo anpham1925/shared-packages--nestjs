@@ -12,7 +12,7 @@ export class LogService {
   async writeLog(
     exception: unknown,
     request: Record<string, any>,
-  ): Promise<number> {
+  ): Promise<string> {
     const customException = exception as any;
     const log = new Log();
 
