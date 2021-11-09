@@ -1,6 +1,6 @@
 {
   "name": "@anpham1925/nestjs",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Custom Modules and Helpers for NestJS",
   "main": "./dist/index.js",
   "repository": "https://github.com/anpham1925/shared-packages--nestjs",
