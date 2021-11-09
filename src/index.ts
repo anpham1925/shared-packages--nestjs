@@ -1,5 +1,3 @@
-import { CognitoModule } from './auth/cognito/module';
-
 export {
   AuditLog,
   AuditLogInterceptor,
@@ -7,10 +5,10 @@ export {
   AuditLogService,
   METADATA,
 } from './audit-log';
+export { CognitoModule, CognitoService } from './auth/cognito';
 export { Log, LogModule, LogService } from './custom-log';
+export { PaginationRequest, PaginationResult } from './dto';
+export { BaseEntity } from './entities';
 export { AllExceptionsFilter } from './filters';
 export { customThrowError, getError } from './helpers';
 export { FormatResponseInterceptor } from './interceptors';
-export { BaseEntity } from './entities';
-export { PaginationRequest, PaginationResult } from './dto';
-export { CognitoModule, CognitoService } from './auth/cognito';
