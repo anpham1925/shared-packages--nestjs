@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { CognitoService } from './cognito';
 
 @Module({
-  imports: [],
+  imports: [ConfigModule],
   controllers: [],
   providers: [CognitoService],
   exports: [CognitoService],
