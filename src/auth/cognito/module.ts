@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { CognitoService } from './cognito';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [],
   controllers: [],
   providers: [CognitoService],
   exports: [CognitoService],
