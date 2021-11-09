@@ -1,10 +1,37 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
-  CognitoUserPool,
-  CognitoUserAttribute,
   AuthenticationDetails,
   CognitoUser,
+  CognitoUserAttribute,
+  CognitoUserPool,
+  CognitoUserSession,
 } from 'amazon-cognito-identity-js';
-export class Cognito {
+import jwt from 'jsonwebtoken';
+import jwkToPem from 'jwk-to-pem';
+
+interface TokenHeader {
+  kid: string;
+  alg: string;
+}
+
+interface Claim {
+  token_use: string;
+  auth_time: number;
+  iss: string;
+  exp: number;
+  username: string;
+  client_id: string;
+}
+
+export interface SignInResponse {
+  accessToken: string;
+  refreshToken: string;
+  idToken: string;
+}
+
+@Injectable()
+export class CognitoService {
   clientId: string;
   userPool: string;
   userPoolData: CognitoUserPool;
@@ -28,53 +55,121 @@ export class Cognito {
       },
     ];
   };
-  constructor(
-    ClientId: string = '6cf41461bdjrg7r5cua5me6h9n',
-    UserPoolId: string = 'ap-southeast-1_1PT2j2N7C',
-    region: string = 'ap-southeast-1',
-    identityPoolId: string = 'ap-southeast-1:86104e2e-5908-4009-a0ca-e5ab94615d3a',
-  ) {
+
+  issuer: string;
+  constructor(private configService: ConfigService) {
+    const region = this.configService.get<string>('AWS_COGNITO_REGION');
+    const userPoolId = this.configService.get<string>('AWS_COGNITO_USER_POOL');
+    const clientId = this.configService.get<string>('AWS_COGNITO_CLIENT_ID');
     this.userPoolData = new CognitoUserPool({
-      UserPoolId,
-      ClientId,
+      UserPoolId: userPoolId || '',
+      ClientId: clientId || '',
+    });
+    this.issuer = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+  }
+
+  async signUp(
+    username: string,
+    email: string,
+    password: string,
+  ): Promise<boolean> {
+    try {
+      await this._asyncSignUp(username, email, password);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  }
+
+  private _asyncSignUp(username: string, email: string, password: string) {
+    return new Promise((resolve, reject) => {
+      this.userPoolData.signUp(
+        email,
+        password,
+        [new CognitoUserAttribute({ Name: 'username', Value: username })],
+        [],
+        (err, data) => {
+          if (err) return reject(err);
+          return resolve(data);
+        },
+      );
     });
   }
 
-  signUp(username: string, email: string, password: string) {
-    this.userPoolData.signUp(
-      email,
-      password,
-      [new CognitoUserAttribute({ Name: 'username', Value: username })],
-      [],
-      (err, data) => {
-        if (err) {
-          return console.log('error roi', err);
-        }
+  async signIn(Username: string, Password: string): Promise<SignInResponse> {
+    try {
+      const data = await this._asyncCognitoAuth(Username, Password);
+      const accessToken = data.getAccessToken().getJwtToken();
+      const refreshToken = data.getRefreshToken().getToken();
+      const idToken = data.getIdToken().getJwtToken();
 
-        console.log({ data });
-      },
-    );
+      return { accessToken, refreshToken, idToken };
+    } catch (error) {
+      return { accessToken: '', refreshToken: '', idToken: '' };
+    }
   }
 
-  signIn(Username: string, Password: string) {
+  private _asyncCognitoAuth(
+    Username: string,
+    Password: string,
+  ): Promise<CognitoUserSession> {
     const authDetail = new AuthenticationDetails({ Username, Password });
     const cognitoUser = new CognitoUser({ Username, Pool: this.userPoolData });
 
-    cognitoUser.authenticateUser(authDetail, {
-      onFailure: (error) => {
-        console.log(error);
-      },
-      onSuccess: (data) => {
-        const accessToken = data.getAccessToken().getJwtToken();
-        const refreshToken = data.getRefreshToken().getToken();
-        const idToken = data.getIdToken().getJwtToken();
-
-        console.log({ accessToken, refreshToken, idToken });
-      },
+    return new Promise((resolve, reject) => {
+      cognitoUser.authenticateUser(authDetail, {
+        onFailure: reject,
+        onSuccess: resolve,
+      });
     });
   }
 
-  verifyToken(token: string) {
+  verifyToken(token: string): boolean {
+    const tokenSections = (token || '').split('.');
+    if (tokenSections.length < 2) {
+      return false;
+    }
+
+    const headerJSON = Buffer.from(tokenSections[0], 'base64').toString('utf8');
+    const header = JSON.parse(headerJSON) as TokenHeader;
+
+    const chosenJWK = this.jwk.keys.find((x) => x.kid === header.kid);
+
+    if (!chosenJWK) {
+      return false;
+    }
+
     //   const token =
+    const claim = jwt.verify(token, jwkToPem(chosenJWK), {
+      algorithms: ['RS256'],
+    }) as Claim;
+
+    return this._verifyToken(claim);
+  }
+
+  private _verifyExpiration(claim: Claim, current: number): boolean {
+    if (current > claim.exp || current < claim.auth_time) {
+      return false;
+    }
+    return true;
+  }
+
+  private _verifyIssuer(claim: Claim, issuer: string): boolean {
+    return claim.iss === issuer;
+  }
+
+  private _verifyUsage(claim: Claim, usage: string[]): boolean {
+    return usage.includes(claim.token_use);
+  }
+
+  private _verifyToken(claim: Claim): boolean {
+    const current = Math.floor(new Date().valueOf() / 1000);
+
+    return (
+      this._verifyExpiration(claim, current) &&
+      this._verifyIssuer(claim, this.issuer) &&
+      this._verifyUsage(claim, ['access'])
+    );
   }
 }
