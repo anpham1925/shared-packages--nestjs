@@ -5,7 +5,13 @@ export {
   AuditLogService,
   METADATA,
 } from './audit-log';
-export { CognitoModule, CognitoService } from './auth/cognito';
+export {
+  CognitoModule,
+  CognitoService,
+  Claim,
+  JWK,
+  SignInResponse,
+} from './auth/cognito';
 export { Log, LogModule, LogService } from './custom-log';
 export { PaginationRequest, PaginationResult } from './dto';
 export { BaseEntity } from './entities';
