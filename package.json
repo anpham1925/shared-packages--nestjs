@@ -22,7 +22,7 @@
     "typeorm": "^0.2.38"
   },
   "scripts": {
-    "prepublish": "rimraf dist && tsc"
+    "prepublishOnly": "rimraf dist && tsc"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^8.5.5",
