@@ -17,7 +17,7 @@ interface TokenHeader {
   alg: string;
 }
 
-interface Claim {
+export interface Claim {
   token_use: string;
   auth_time: number;
   iss: string;
