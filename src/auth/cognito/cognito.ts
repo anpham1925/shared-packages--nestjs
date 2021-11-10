@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   AuthenticationDetails,
@@ -7,8 +8,9 @@ import {
   CognitoUserPool,
   CognitoUserSession,
 } from 'amazon-cognito-identity-js';
-import jwt from 'jsonwebtoken';
-import jwkToPem from 'jwk-to-pem';
+import * as jwt from 'jsonwebtoken';
+import jwkToBuffer = require('jwk-to-pem');
+import { firstValueFrom } from 'rxjs';
 
 interface TokenHeader {
   kid: string;
@@ -30,34 +32,28 @@ export interface SignInResponse {
   idToken: string;
 }
 
+export interface JWK {
+  alg: string;
+  e: string;
+  kid: string;
+  kty: string;
+  n: string;
+  use: string;
+}
+
 @Injectable()
-export class CognitoService {
+export class CognitoService implements OnModuleInit {
   clientId: string;
   userPool: string;
   userPoolData: CognitoUserPool;
   jwk: {
-    keys: [
-      {
-        alg: 'RS256';
-        e: 'AQAB';
-        kid: 'RY2fXMxj5M3MTxmjZkX5+BP78Fprf8cgcEusosfY0as=';
-        kty: 'RSA';
-        n: 'tWTYQlu18qhDq4fOucEn7C3q19yjAxOh7TvpMxWmkgrSXWKpuPVOcMtiA3A24ZI9FJyO9dEx2-DlJuxMWZLhVRx-klkQcVMlAZjLcAYRcAHI4Kz4nYFbYz23O0koLuhCu6VPPRn-5lqtw-LJvv162UwSdNP4iyDHetBI_ANrZUhOJ6-KAyMN54IqIBIle7PpAnoO0bmIMT64HKQQOO7SZCjCIBG-RIZovkLOUF04YJffnH88Ze83Uabrw7CHCn6Cq17M001SBw2NcLmfxc8Z915sTObPYAkuzjo7c4NoYMe1Xfj-Uui4E0j3qRvZPRBwFihusOV7pmrKV6Bw001epQ';
-        use: 'sig';
-      },
-      {
-        alg: 'RS256';
-        e: 'AQAB';
-        kid: 'TVcaeqzD9yCXSIS1UIwgUHPRNdA+N6Hcn6wZWi7xB9U=';
-        kty: 'RSA';
-        n: 'siJrUHqh8SEAbH3dnJjMFWnTJGrh8zQsdPRCmz-MqwPohsgmbVbc5_z1ED976zR3Pd77cHQQcNSuSWsB6j3vJJjhTFILLbJVGTAyLjClOI2IhPoaGoltrYGz6m0kBQ9iMbXSw9--NT00ZLoP0DQtgERWLzu864ORiMsH0uxeBx89ChfMHunwyfD0POTYRViJ9AVDVgHUwN9KwXfNbypDkDyojhq6ZqfQT-gjNpKzHP8_g0etg0XHr3Gn4OIJH57CEn3Az56xRJb_uRmYlx421E0Ys8TxZU_zp1egIVXMWCQUxu219YLB-Oh3qdcMvZDezpvoEQFBfoYfF5Rh28kHRw';
-        use: 'sig';
-      },
-    ];
+    keys: any[];
   };
-
   issuer: string;
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private httpService: HttpService,
+  ) {
     const region = this.configService.get<string>('AWS_COGNITO_REGION');
     const userPoolId = this.configService.get<string>('AWS_COGNITO_USER_POOL');
     const clientId = this.configService.get<string>('AWS_COGNITO_CLIENT_ID');
@@ -66,6 +62,13 @@ export class CognitoService {
       ClientId: clientId || '',
     });
     this.issuer = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+  }
+
+  async onModuleInit() {
+    const result = await firstValueFrom(
+      this.httpService.get(`${this.issuer}/.well-known/jwks.json`),
+    );
+    this.jwk = result.data;
   }
 
   async signUp(
@@ -85,9 +88,9 @@ export class CognitoService {
   private _asyncSignUp(username: string, email: string, password: string) {
     return new Promise((resolve, reject) => {
       this.userPoolData.signUp(
-        email,
+        username,
         password,
-        [new CognitoUserAttribute({ Name: 'username', Value: username })],
+        [new CognitoUserAttribute({ Name: 'email', Value: email })],
         [],
         (err, data) => {
           if (err) return reject(err);
@@ -140,8 +143,9 @@ export class CognitoService {
       return false;
     }
 
-    //   const token =
-    const claim = jwt.verify(token, jwkToPem(chosenJWK), {
+    const pem = jwkToBuffer(chosenJWK);
+
+    const claim = jwt.verify(token, pem, {
       algorithms: ['RS256'],
     }) as Claim;
 
