@@ -20,3 +20,4 @@ export { customThrowError, getError } from './helpers';
 export { FormatResponseInterceptor } from './interceptors';
 
 export * from './middlewares';
+export * from './auth/default';
