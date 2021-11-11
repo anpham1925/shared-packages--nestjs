@@ -25,4 +25,9 @@ export class AuditLog extends BaseEntity {
     default: '',
   })
   url: string;
+
+  @Column({
+    default: '',
+  })
+  ip: string;
 }

@@ -2,6 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditLog } from './entity';
+import { Request } from 'express';
+
+export interface CustomRequest extends Request {
+  authInstance?: any;
+}
 
 @Injectable()
 export class AuditLogService {
@@ -13,7 +18,7 @@ export class AuditLogService {
   async writeLog(
     module: string,
     action: string,
-    request: Record<string, any>,
+    request: CustomRequest,
     restricted: boolean = false,
   ): Promise<string | number> {
     const log = new AuditLog();
@@ -26,6 +31,11 @@ export class AuditLogService {
     log.module = module;
     log.url = request.originalUrl;
     log.content = restricted ? '' : request.body;
+    const xForwardedFor = request.headers['x-forwarded-for'];
+    log.ip =
+      typeof xForwardedFor === 'string'
+        ? xForwardedFor
+        : xForwardedFor?.join(', ') || request.ips.join(', ') || request.ip;
 
     const result = await this.auditLogRepository.save(log);
 

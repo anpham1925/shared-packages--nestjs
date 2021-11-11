@@ -18,3 +18,5 @@ export { BaseEntity } from './entities';
 export { AllExceptionsFilter } from './filters';
 export { customThrowError, getError } from './helpers';
 export { FormatResponseInterceptor } from './interceptors';
+
+export * from './middlewares';

@@ -44,12 +44,20 @@ export interface JWK {
 @Injectable()
 export class CognitoService implements OnModuleInit {
   clientId: string;
+  clientSecret: string;
+
   userPool: string;
   userPoolData: CognitoUserPool;
   jwk: {
     keys: any[];
   };
   issuer: string;
+
+  authorization: string;
+
+  authURL: string =
+    'https://sms-secret.auth.ap-southeast-1.amazoncognito.com/oauth2/token';
+
   constructor(
     private configService: ConfigService,
     private httpService: HttpService,
@@ -57,11 +65,20 @@ export class CognitoService implements OnModuleInit {
     const region = this.configService.get<string>('AWS_COGNITO_REGION');
     const userPoolId = this.configService.get<string>('AWS_COGNITO_USER_POOL');
     const clientId = this.configService.get<string>('AWS_COGNITO_CLIENT_ID');
+    const clientSecret = this.configService.get<string>(
+      'AWS_COGNITO_CLIENT_SECRET',
+    );
+
     this.userPoolData = new CognitoUserPool({
       UserPoolId: userPoolId || '',
       ClientId: clientId || '',
     });
     this.issuer = `https://cognito-idp.${region}.amazonaws.com/${userPoolId}`;
+    this.clientId = clientId || '';
+    this.clientSecret = clientSecret || '';
+    this.authorization = Buffer.from(
+      `${this.clientId}:${this.clientSecret}`,
+    ).toString('base64');
   }
 
   async onModuleInit() {
